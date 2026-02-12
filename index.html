@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>PHOTOWITHCHEN</title>
+    <style>
+        :root { --accent: #00AEEF; --dark: #121212; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
+        .app-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+        .screen { display: none; }
+        .active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 1. 迎賓頁面 */
+        .welcome-logo { font-size: 3rem; font-weight: 900; color: var(--accent); margin-bottom: 10px; letter-spacing: 2px; }
+        .welcome-sub { font-size: 1.2rem; color: #888; margin-bottom: 40px; }
+
+        /* 2. 選擇樣式 */
+        .temp-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .temp-item { border: 2px solid #444; padding: 5px; cursor: pointer; border-radius: 8px; transition: 0.3s; }
+        .temp-item.selected { border-color: var(--accent); background: #003344; }
+        .temp-item img { width: 100%; border-radius: 4px; }
+
+        /* 3. 拍攝視窗 */
+        .preview-box {
+            position: relative;
+            width: 487px; height: 310px; margin: 20px auto;
+            background: #000; border: 4px solid white; overflow: hidden;
+            max-width: 90vw; aspect-ratio: 4.87 / 3.1;
+        }
+        #main-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .idol-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-weight: bold; z-index: 15; text-shadow: 0 0 15px rgba(0,0,0,0.8); }
+        #flash-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 50; }
+        .flash-active { animation: flash-play 0.4s ease-out; }
+        @keyframes flash-play { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* 按鈕與選單 */
+        button { background: var(--accent); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 18px; cursor: pointer; font-weight: bold; margin: 10px; transition: 0.2s; }
+        button:hover { transform: scale(1.05); }
+        button:disabled { background: #444; cursor: not-allowed; }
+        .back-btn { background: transparent; border: 1px solid #666; color: #888; padding: 10px 20px; font-size: 14px; }
+        select { padding: 12px; border-radius: 8px; background: #333; color: white; border: 1px solid var(--accent); font-size: 16px; }
+
+        /* 結果預覽 */
+        #final-preview-img { width: 200px; border: 4px solid white; margin: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .loading-spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div id="sc-start" class="screen active">
+        <div class="welcome-logo">IDOL BOX</div>
+        <div class="welcome-sub">與你的偶像捕捉動態瞬間</div>
+        <button onclick="goStep('sc-welcome')">開始製作</button>
+    </div>
+
+    <div id="sc-welcome" class="screen">
+        <h2 style="color:var(--accent)">1. 選擇樣式與濾鏡</h2>
+        <div class="temp-grid">
+            <div class="temp-item selected" onclick="selectTemp('template_1.png', this)"><img src="template_1.png"><span>款式 1</span></div>
+            <div class="temp-item" onclick="selectTemp('template_2.png', this)"><img src="template_2.png"><span>款式 2</span></div>
+            <div class="temp-item" onclick="selectTemp('template_3.png', this)"><img src="template_3.png"><span>款式 3</span></div>
+        </div>
+        <div style="margin:20px 0;">
+            選擇濾鏡：
+            <select id="filter-choice" onchange="applyFilter()">
+                <option value="none">原色 (Original)</option>
+                <option value="grayscale(1)">黑白 (B&W)</option>
+                <option value="sepia(0.4) brightness(1.1)">柔和復古</option>
+                <option value="contrast(1.2) saturate(1.2)">鮮豔色彩</option>
+            </select>
+        </div>
+        <button onclick="goStep('sc-shooting')">進入拍攝</button>
+        <br>
+        <button class="back-btn" onclick="goStep('sc-start')">返回首頁</button>
+    </div>
+
+    <div id="sc-shooting" class="screen">
+        <h2 id="shot-label">Shot 1/4</h2>
+        <div class="preview-box">
+            <video id="main-video" autoplay playsinline></video>
+            <img id="idol-layer" class="idol-overlay" src="idolchen_1.png">
+            <div id="timer-text" class="timer"></div>
+            <div id="flash-layer"></div>
+        </div>
+        <button id="start-btn" onclick="takeShot()">倒數錄製並拍照</button>
+        <button id="finish-btn" onclick="generateAll()" style="display:none; background:#fff; color:#000;">產生成品</button>
+        <br>
+        <button class="back-btn" onclick="location.reload()">重新選擇模板</button>
+    </div>
+
+    <div id="sc-result" class="screen">
+        <h2>✨ 製作完成</h2>
+        <div id="loading-area">
+            <div class="loading-spinner"></div>
+            <p id="status-text">正在對齊並處理高清檔案...</p>
+        </div>
+        <img id="final-preview-img" style="display:none;">
+        <br>
+        <button id="dl-all-btn" style="display:none;">💾 同時下載 照片 + 影片</button>
+        <button onclick="location.reload()" style="background:#444;">重新拍攝</button>
+    </div>
+
+</div>
+
+<canvas id="rec-cvs" style="display:none;"></canvas>
+<canvas id="photo-cvs" style="display:none;"></canvas>
+<canvas id="video-comp-cvs" style="display:none;"></canvas>
+
+<script>
+    let currentShot = 0;
+    let videoBlobs = []; 
+    let photoData = [];  
+    let chosenTemp = 'template_1.png';
+    const idols = ['idolchen_1.png', 'idolchen_2.png', 'idolchen_3.png', 'idolchen_4.png'];
+    let cameraStream;
+
+    function goStep(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'sc-shooting') startCam();
+    }
+
+    async function startCam() {
+        if(!cameraStream) {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+                document.getElementById('main-video').srcObject = cameraStream;
+            } catch(e) { alert("無法存取相機，請檢查權限。"); }
+        }
+    }
+
+    function selectTemp(f, el) {
+        chosenTemp = f;
+        document.querySelectorAll('.temp-item').forEach(i => i.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function applyFilter() {
+        document.getElementById('main-video').style.filter = document.getElementById('filter-choice').value;
+    }
+
+    async function takeShot() {
+        const startBtn = document.getElementById('start-btn');
+        startBtn.disabled = true;
+        const v = document.getElementById('main-video');
+        const filter = document.getElementById('filter-choice').value;
+        const idolImg = new Image(); 
+        idolImg.src = idols[currentShot];
+
+        const rCvs = document.getElementById('rec-cvs');
+        const rCtx = rCvs.getContext('2d');
+        rCvs.width = 640; rCvs.height = 412; // 錄製比例
+
+        const recStream = rCvs.captureStream(30);
+        const recorder = new MediaRecorder(recStream, { mimeType: 'video/webm;codecs=vp8' });
+        const chunks = [];
+        recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => videoBlobs.push(new Blob(chunks, { type: 'video/webm' }));
+        recorder.start();
+
+        let isRecording = true;
+        const renderLoop = () => {
+            rCtx.save();
+            rCtx.filter = filter;
+            rCtx.translate(rCvs.width, 0); rCtx.scale(-1, 1);
+            rCtx.drawImage(v, 0, 0, rCvs.width, rCvs.height);
+            rCtx.restore();
+            rCtx.drawImage(idolImg, 0, 0, rCvs.width, rCvs.height);
+            if(isRecording) requestAnimationFrame(renderLoop);
+        };
+        renderLoop();
+
+        // 3秒倒數
+        for(let i=3; i>0; i--) {
+            document.getElementById('timer-text').innerText = i;
+            await new Promise(r => setTimeout(r, 1000));
+        }
+        document.getElementById('timer-text').innerText = "";
+
+        // 閃光燈
+        const flash = document.getElementById('flash-layer');
+        flash.classList.remove('flash-active');
+        void flash.offsetWidth;
+        flash.classList.add('flash-active');
+
+        // 高清拍照
+        const pCvs = document.createElement('canvas');
+        pCvs.width = 2450; pCvs.height = 1575;
+        const pCtx = pCvs.getContext('2d');
+        pCtx.filter = filter;
+        pCtx.translate(pCvs.width, 0); pCtx.scale(-1, 1);
+        pCtx.drawImage(v, 0, 0, pCvs.width, pCvs.height);
+        pCtx.setTransform(1,0,0,1,0,0);
+        pCtx.drawImage(idolImg, 0, 0, pCvs.width, pCvs.height);
+        photoData.push(pCvs.toDataURL('image/png', 0.95));
+
+        setTimeout(() => {
+            isRecording = false;
+            recorder.stop();
+            currentShot++;
+            if(currentShot < 4) {
+                document.getElementById('shot-label').innerText = `Shot ${currentShot+1}/4`;
+                document.getElementById('idol-layer').src = idols[currentShot];
+                startBtn.disabled = false;
+            } else {
+                startBtn.style.display = 'none';
+                document.getElementById('finish-btn').style.display = 'inline-block';
+            }
+        }, 500);
+    }
+
+    async function generateAll() {
+        goStep('sc-result');
+        const templateImg = new Image();
+        templateImg.src = chosenTemp;
+        await new Promise(r => templateImg.onload = r);
+
+        // 1. 照片處理 (2600x7650)
+        const photoCvs = document.getElementById('photo-cvs');
+        photoCvs.width = 2600; photoCvs.height = 7650;
+        const pCtx = photoCvs.getContext('2d');
+        for(let i=0; i<4; i++) {
+            const img = new Image(); img.src = photoData[i];
+            await new Promise(r => img.onload = r);
+            pCtx.drawImage(img, 75, 200 + (i * 1700), 2450, 1575);
+        }
+        pCtx.drawImage(templateImg, 0, 0, 2600, 7650);
+        const finalPhotoURL = photoCvs.toDataURL('image/png', 0.95);
+        document.getElementById('final-preview-img').src = finalPhotoURL;
+        document.getElementById('final-preview-img').style.display = 'inline-block';
+
+        // 2. 影片精確對位處理 (520x1530)
+        const vCvs = document.getElementById('video-comp-cvs');
+        vCvs.width = 520; vCvs.height = 1530;
+        const vCtx = vCvs.getContext('2d');
+        const vElements = await Promise.all(videoBlobs.map(blob => {
+            return new Promise(res => {
+                const v = document.createElement('video');
+                v.src = URL.createObjectURL(blob);
+                v.loop = true; v.muted = true; v.play();
+                v.onloadeddata = () => res(v);
+            });
+        }));
+
+        const finalStream = vCvs.captureStream(30);
+        const finalRecorder = new MediaRecorder(finalStream, { mimeType: 'video/webm;codecs=vp8' });
+        const vChunks = [];
+        finalRecorder.ondataavailable = e => { if(e.data.size > 0) vChunks.push(e.data); };
+        
+        finalRecorder.onstop = () => {
+            const finalVideoURL = URL.createObjectURL(new Blob(vChunks, { type: 'video/mp4' }));
+            document.getElementById('loading-area').style.display = 'none';
+            const dlBtn = document.getElementById('dl-all-btn');
+            dlBtn.style.display = 'inline-block';
+            dlBtn.onclick = () => {
+                const a1 = document.createElement('a'); a1.href = finalPhotoURL; a1.download = 'idol_photo.png'; a1.click();
+                setTimeout(() => {
+                    const a2 = document.createElement('a'); a2.href = finalVideoURL; a2.download = 'idol_video.mp4'; a2.click();
+                }, 800);
+            };
+        };
+
+        finalRecorder.start();
+        const startT = Date.now();
+        const vLoop = () => {
+            vCtx.clearRect(0,0,520,1530);
+            const vX = 15, vYStart = 40, vGap = 340, vW = 490, vH = 315;
+            vElements.forEach((v, i) => vCtx.drawImage(v, vX, vYStart + (i * vGap), vW, vH));
+            vCtx.drawImage(templateImg, 0, 0, 520, 1530);
+            if(Date.now() - startT < 4500) requestAnimationFrame(vLoop);
+            else finalRecorder.stop();
+        };
+        vLoop();
+    }
+</script>
+</body>
+</html>
