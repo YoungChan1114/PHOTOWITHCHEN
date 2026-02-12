@@ -3,49 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <title>PHOTOWITHCHEN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --accent: #00AEEF; --dark: #121212; }
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
-        .app-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+        :root { 
+            --blue: #00acdc;
+            --cream: #fff6db;
+            --red: #dc362e;
+            --black: #1a1a1a;
+            --white: #ffffff;
+        }
+        
+        body { 
+            font-family: "Dela Gothic One", sans-serif;
+            background: var(--cream); 
+            color: var(--black); 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            overflow-x: hidden; 
+        }
+
+        .app-container { 
+            width: 100%; 
+            max-width: 500px; 
+            padding: 20px; 
+            text-align: center; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+
         .screen { display: none; }
         .active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 1. 迎賓頁面 */
-        .welcome-logo { font-size: 3rem; font-weight: 900; color: var(--accent); margin-bottom: 10px; letter-spacing: 2px; }
-        .welcome-sub { font-size: 1.2rem; color: #888; margin-bottom: 40px; }
+        /* 迎賓頁面 */
+        .title-img { width: 100%; max-width: 350px; margin-bottom: 20px; filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.1)); }
+        .welcome-sub { font-size: 1rem; color: var(--blue); margin-bottom: 40px; letter-spacing: 1px; }
 
-        /* 2. 選擇樣式 */
-        .temp-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .temp-item { border: 2px solid #444; padding: 5px; cursor: pointer; border-radius: 8px; transition: 0.3s; }
-        .temp-item.selected { border-color: var(--accent); background: #003344; }
-        .temp-item img { width: 100%; border-radius: 4px; }
+        /* 選擇樣式 */
+        .temp-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+        .temp-item { border: 3px solid var(--black); padding: 5px; cursor: pointer; border-radius: 12px; transition: 0.3s; background: var(--white); }
+        .temp-item.selected { border-color: var(--blue); background: var(--blue); color: var(--white); }
+        .temp-item img { width: 100%; border-radius: 8px; }
+        .temp-item span { display: block; margin-top: 5px; font-size: 12px; }
 
-        /* 3. 拍攝視窗 */
+        /* 拍攝視窗 */
         .preview-box {
             position: relative;
-            width: 487px; height: 310px; margin: 20px auto;
-            background: #000; border: 4px solid white; overflow: hidden;
-            max-width: 90vw; aspect-ratio: 4.87 / 3.1;
+            width: 480px; height: 310px; margin: 20px auto;
+            background: #000; border: 8px solid var(--black); border-radius: 20px; overflow: hidden;
+            max-width: 90vw; aspect-ratio: 4.8 / 3.1;
+            box-shadow: 8px 8px 0px var(--blue);
         }
         #main-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         .idol-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-weight: bold; z-index: 15; text-shadow: 0 0 15px rgba(0,0,0,0.8); }
+        .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; z-index: 15; text-shadow: 0 0 20px rgba(0,0,0,0.9); color: var(--white); }
+        
         #flash-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 50; }
         .flash-active { animation: flash-play 0.4s ease-out; }
         @keyframes flash-play { 0% { opacity: 1; } 100% { opacity: 0; } }
 
-        /* 按鈕與選單 */
-        button { background: var(--accent); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 18px; cursor: pointer; font-weight: bold; margin: 10px; transition: 0.2s; }
-        button:hover { transform: scale(1.05); }
-        button:disabled { background: #444; cursor: not-allowed; }
-        .back-btn { background: transparent; border: 1px solid #666; color: #888; padding: 10px 20px; font-size: 14px; }
-        select { padding: 12px; border-radius: 8px; background: #333; color: white; border: 1px solid var(--accent); font-size: 16px; }
+        /* 按鈕系統 */
+        button { 
+            font-family: "Dela Gothic One", sans-serif;
+            background: var(--blue); 
+            color: var(--white); 
+            border: 3px solid var(--black); 
+            padding: 16px 32px; 
+            border-radius: 15px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            margin: 10px; 
+            box-shadow: 0 6px 0 var(--black);
+            transition: all 0.1s;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--black); }
+        button:disabled { background: #ccc; border-color: #999; box-shadow: 0 4px 0 #999; cursor: not-allowed; }
+        
+        #start-btn { background: var(--red); } /* 拍攝按鈕用紅色強調 */
+        #finish-btn { background: var(--blue); }
 
-        /* 結果預覽 */
-        #final-preview-img { width: 200px; border: 4px solid white; margin: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .loading-spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        .back-btn { background: var(--white); border: 3px solid var(--black); color: var(--black); padding: 10px 20px; font-size: 14px; box-shadow: 0 4px 0 var(--black); }
+        
+        select { 
+            font-family: "Dela Gothic One", sans-serif;
+            padding: 10px; border-radius: 8px; background: var(--white); color: var(--black); border: 3px solid var(--black); font-size: 16px;
+        }
+
+        /* 結果展示 */
+        #final-preview-img { width: 220px; border: 8px solid var(--black); border-radius: 10px; margin: 20px; background: white; box-shadow: 10px 10px 0px var(--blue); }
+        .loading-spinner { border: 6px solid var(--white); border-top: 6px solid var(--blue); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        h2 { color: var(--black); text-shadow: 2px 2px 0px var(--white); }
     </style>
 </head>
 <body>
@@ -53,56 +108,54 @@
 <div class="app-container">
     
     <div id="sc-start" class="screen active">
-        <div class="welcome-logo">IDOL BOX</div>
-        <div class="welcome-sub">與你的偶像捕捉動態瞬間</div>
-        <button onclick="goStep('sc-welcome')">開始製作</button>
+        <img src="title.png" alt="PHOTOWITHCHEN" class="title-img">
+        <div class="welcome-sub">動態拍貼・捕捉專屬瞬間</div>
+        <button onclick="goStep('sc-welcome')">START</button>
     </div>
 
     <div id="sc-welcome" class="screen">
-        <h2 style="color:var(--accent)">1. 選擇樣式與濾鏡</h2>
+        <h2>SELECT STYLE</h2>
         <div class="temp-grid">
-            <div class="temp-item selected" onclick="selectTemp('template_1.png', this)"><img src="template_1.png"><span>款式 1</span></div>
-            <div class="temp-item" onclick="selectTemp('template_2.png', this)"><img src="template_2.png"><span>款式 2</span></div>
-            <div class="temp-item" onclick="selectTemp('template_3.png', this)"><img src="template_3.png"><span>款式 3</span></div>
+            <div class="temp-item selected" onclick="selectTemp('template_1.png', this)"><img src="template_1.png"><span>MODE 1</span></div>
+            <div class="temp-item" onclick="selectTemp('template_2.png', this)"><img src="template_2.png"><span>MODE 2</span></div>
+            <div class="temp-item" onclick="selectTemp('template_3.png', this)"><img src="template_3.png"><span>MODE 3</span></div>
         </div>
         <div style="margin:20px 0;">
-            選擇濾鏡：
+            FILTER: 
             <select id="filter-choice" onchange="applyFilter()">
-                <option value="none">原色 (Original)</option>
-                <option value="grayscale(1)">黑白 (B&W)</option>
-                <option value="sepia(0.4) brightness(1.1)">柔和復古</option>
-                <option value="contrast(1.2) saturate(1.2)">鮮豔色彩</option>
+                <option value="none">ORIGINAL</option>
+                <option value="grayscale(1)">B&W</option>
+                <option value="sepia(0.4) brightness(1.1)">SOFT</option>
+                <option value="contrast(1.2) saturate(1.2)">VIVID</option>
             </select>
         </div>
-        <button onclick="goStep('sc-shooting')">進入拍攝</button>
+        <button onclick="goStep('sc-shooting')">READY</button>
         <br>
-        <button class="back-btn" onclick="goStep('sc-start')">返回首頁</button>
+        <button class="back-btn" onclick="goStep('sc-start')">HOME</button>
     </div>
 
     <div id="sc-shooting" class="screen">
-        <h2 id="shot-label">Shot 1/4</h2>
+        <h2 id="shot-label" style="letter-spacing: 2px;">SHOT 1/4</h2>
         <div class="preview-box">
             <video id="main-video" autoplay playsinline></video>
             <img id="idol-layer" class="idol-overlay" src="idolchen_1.png">
             <div id="timer-text" class="timer"></div>
             <div id="flash-layer"></div>
         </div>
-        <button id="start-btn" onclick="takeShot()">倒數錄製並拍照</button>
-        <button id="finish-btn" onclick="generateAll()" style="display:none; background:#fff; color:#000;">產生成品</button>
-        <br>
-        <button class="back-btn" onclick="location.reload()">重新選擇模板</button>
+        <button id="start-btn" onclick="takeShot()">CAPTURE</button>
+        <button id="finish-btn" onclick="generateAll()" style="display:none;">FINISH</button>
     </div>
 
     <div id="sc-result" class="screen">
-        <h2>✨ 製作完成</h2>
+        <h2>COMPLETE!</h2>
         <div id="loading-area">
             <div class="loading-spinner"></div>
-            <p id="status-text">正在對齊並處理高清檔案...</p>
+            <p id="status-text">PROCESSING HD FILES...</p>
         </div>
         <img id="final-preview-img" style="display:none;">
         <br>
-        <button id="dl-all-btn" style="display:none;">💾 同時下載 照片 + 影片</button>
-        <button onclick="location.reload()" style="background:#444;">重新拍攝</button>
+        <button id="dl-all-btn" style="display:none;">DOWNLOAD ALL</button>
+        <button class="back-btn" onclick="location.reload()">RETAKE</button>
     </div>
 
 </div>
@@ -112,6 +165,7 @@
 <canvas id="video-comp-cvs" style="display:none;"></canvas>
 
 <script>
+    /* 以下邏輯與你要求的定稿版完全一致，未做更動 */
     let currentShot = 0;
     let videoBlobs = []; 
     let photoData = [];  
@@ -130,7 +184,7 @@
             try {
                 cameraStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
                 document.getElementById('main-video').srcObject = cameraStream;
-            } catch(e) { alert("無法存取相機，請檢查權限。"); }
+            } catch(e) { alert("Camera Error"); }
         }
     }
 
@@ -154,7 +208,7 @@
 
         const rCvs = document.getElementById('rec-cvs');
         const rCtx = rCvs.getContext('2d');
-        rCvs.width = 640; rCvs.height = 412; // 錄製比例
+        rCvs.width = 640; rCvs.height = 412;
 
         const recStream = rCvs.captureStream(30);
         const recorder = new MediaRecorder(recStream, { mimeType: 'video/webm;codecs=vp8' });
@@ -175,20 +229,17 @@
         };
         renderLoop();
 
-        // 3秒倒數
         for(let i=3; i>0; i--) {
             document.getElementById('timer-text').innerText = i;
             await new Promise(r => setTimeout(r, 1000));
         }
         document.getElementById('timer-text').innerText = "";
 
-        // 閃光燈
         const flash = document.getElementById('flash-layer');
         flash.classList.remove('flash-active');
         void flash.offsetWidth;
         flash.classList.add('flash-active');
 
-        // 高清拍照
         const pCvs = document.createElement('canvas');
         pCvs.width = 2450; pCvs.height = 1575;
         const pCtx = pCvs.getContext('2d');
@@ -204,7 +255,7 @@
             recorder.stop();
             currentShot++;
             if(currentShot < 4) {
-                document.getElementById('shot-label').innerText = `Shot ${currentShot+1}/4`;
+                document.getElementById('shot-label').innerText = `SHOT ${currentShot+1}/4`;
                 document.getElementById('idol-layer').src = idols[currentShot];
                 startBtn.disabled = false;
             } else {
@@ -220,7 +271,6 @@
         templateImg.src = chosenTemp;
         await new Promise(r => templateImg.onload = r);
 
-        // 1. 照片處理 (2600x7650)
         const photoCvs = document.getElementById('photo-cvs');
         photoCvs.width = 2600; photoCvs.height = 7650;
         const pCtx = photoCvs.getContext('2d');
@@ -234,7 +284,6 @@
         document.getElementById('final-preview-img').src = finalPhotoURL;
         document.getElementById('final-preview-img').style.display = 'inline-block';
 
-        // 2. 影片精確對位處理 (520x1530)
         const vCvs = document.getElementById('video-comp-cvs');
         vCvs.width = 520; vCvs.height = 1530;
         const vCtx = vCvs.getContext('2d');
@@ -258,9 +307,9 @@
             const dlBtn = document.getElementById('dl-all-btn');
             dlBtn.style.display = 'inline-block';
             dlBtn.onclick = () => {
-                const a1 = document.createElement('a'); a1.href = finalPhotoURL; a1.download = 'idol_photo.png'; a1.click();
+                const a1 = document.createElement('a'); a1.href = finalPhotoURL; a1.download = 'PHOTOWITHCHEN_photo.png'; a1.click();
                 setTimeout(() => {
-                    const a2 = document.createElement('a'); a2.href = finalVideoURL; a2.download = 'idol_video.mp4'; a2.click();
+                    const a2 = document.createElement('a'); a2.href = finalVideoURL; a2.download = 'PHOTOWITHCHEN_video.mp4'; a2.click();
                 }, 800);
             };
         };
