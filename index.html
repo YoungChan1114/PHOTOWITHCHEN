@@ -313,14 +313,14 @@
             const dlBtn = document.getElementById('dl-all-btn');
             dlBtn.style.display = 'inline-block';
             dlBtn.onclick = () => {
-                const a1 = document.createElement('a'); a1.href = finalPhotoURL; a1.download = 'PHOTO.png';
+                const a1 = document.createElement('a'); a1.href = finalPhotoURL; a1.download = 'PHOTOWITHCHEN_photo.png';
                 document.body.appendChild(a1); a1.click(); document.body.removeChild(a1);
                 
                 setTimeout(() => {
                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
                     if(isIOS) { window.open(finalVideoURL, '_blank'); }
                     else {
-                        const a2 = document.createElement('a'); a2.href = finalVideoURL; a2.download = `VIDEO.${isMp4?'mp4':'webm'}`;
+                        const a2 = document.createElement('a'); a2.href = finalVideoURL; a2.download = `PHOTOWITHCHEN_video.${isMp4?'mp4':'webm'}`;
                         document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
                     }
                 }, 1000);
