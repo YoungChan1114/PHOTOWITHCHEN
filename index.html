@@ -213,13 +213,15 @@
         startBtn.disabled = true; idolImg.src = idols[currentShot];
 
         const rCvs = document.getElementById('rec-cvs'), rCtx = rCvs.getContext('2d');
-        rCvs.width = 1280; rCvs.height = 824; // HD 錄製
+        rCvs.width = 1280; rCvs.height = 824; 
 
         const recStream = rCvs.captureStream(30);
         const recorder = new MediaRecorder(recStream, { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 5000000 });
         const chunks = [];
         recorder.ondataavailable = e => chunks.push(e.data);
         recorder.onstop = () => videoBlobs.push(new Blob(chunks, { type: 'video/webm' }));
+        
+        // 修正：在倒數開始前就啟動錄製
         recorder.start();
 
         let isRecording = true;
@@ -250,6 +252,7 @@
         pCtx.setTransform(1,0,0,1,0,0); pCtx.drawImage(idolImg, 0, 0, pCvs.width, pCvs.height);
         photoData.push(pCvs.toDataURL('image/png', 1.0));
 
+        // 拍照後多留 0.5 秒緩衝再停止錄影
         setTimeout(() => {
             isRecording = false; recorder.stop(); currentShot++;
             if(currentShot < 4) {
@@ -267,7 +270,6 @@
         const templateImg = new Image(); templateImg.src = chosenTemp;
         await new Promise(r => templateImg.onload = r);
 
-        // 合成照片
         const photoCvs = document.getElementById('photo-cvs');
         photoCvs.width = 2600; photoCvs.height = 7650;
         const pCtx = photoCvs.getContext('2d');
@@ -281,7 +283,6 @@
         document.getElementById('final-preview-img').src = finalPhotoURL;
         document.getElementById('final-preview-img').style.display = 'block';
 
-        // 合成影片 (2X HD)
         const vCvs = document.getElementById('video-comp-cvs');
         vCvs.width = 1040; vCvs.height = 3060;
         const vCtx = vCvs.getContext('2d');
@@ -334,7 +335,9 @@
             const vX = 30, vYStart = 80, vGap = 680, vW = 980, vH = 630;
             vElements.forEach((v, i) => vCtx.drawImage(v, vX, vYStart + (i * vGap), vW, vH));
             vCtx.drawImage(templateImg, 0, 0, vCvs.width, vCvs.height);
-            if(Date.now() - startT < 4500) requestAnimationFrame(vLoop);
+            
+            // 影片合成循環時間延長至約 15 秒（因為單次錄影變長，需要更多時間展示循環）
+            if(Date.now() - startT < 15000) requestAnimationFrame(vLoop);
             else finalRecorder.stop();
         };
         vLoop();
