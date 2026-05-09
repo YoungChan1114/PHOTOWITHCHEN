@@ -94,13 +94,35 @@
         .back-btn { background: var(--white); color: var(--black); border: 2px solid var(--black); font-size: 12px; padding: 8px 16px; }
 
         /* 結果預覽區 */
-        .result-scroll { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 10px; }
-        #final-preview-img, #final-video-preview { 
-            width: 220px; border: 6px solid var(--black); border-radius: 10px; background: white; 
-            box-shadow: 8px 8px 0px var(--blue);
+       /* 修改結果預覽區：改為左右滑動 */
+/* 修正後的左右滑動預覽區 */
+        .result-scroll { 
+            display: flex; 
+            flex-direction: row; 
+            flex-wrap: nowrap;     /* 強制不換行 */
+            overflow-x: auto;      /* 橫向滾動 */
+            gap: 15px;             /* 間距微調 */
+            padding: 10px 0 20px;  /* 移除左右 padding 防止推擠 */
+            width: 100%;           /* 滿寬 */
+            max-width: 460px;      /* 關鍵：不超過容器寬度 */
+            margin: 0 auto;        /* 居中 */
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch; 
+            scroll-snap-type: x mandatory; 
         }
-        .loading-spinner { border: 5px solid var(--white); border-top: 5px solid var(--blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #final-preview-img, #final-video-preview { 
+            flex: 0 0 auto;        /* 保持原始寬度不被壓縮 */
+            width: 210px;          /* 略微縮小一點，確保兩張並排時不會切到太多 */
+            border: 6px solid var(--black); 
+            border-radius: 10px; 
+            background: white; 
+            box-shadow: 6px 6px 0px var(--blue); /* 縮小陰影避免佔位 */
+            scroll-snap-align: center; 
+        }
+
+        /* 隱藏捲軸 */
+        .result-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
@@ -149,15 +171,21 @@
     <div id="sc-result" class="screen">
         <h2>COMPLETE!</h2>
         <p id="ios-tip" style="display:none; font-size:11px; color:var(--red); margin:5px;">若無法下載，請長按圖片/影片選擇儲存</p>
+        
         <div id="loading-area">
             <div class="loading-spinner"></div>
-            <p style="color:var(--red);">ALMOST READY!</p>
-            <p style="color:var(--red);">PLEASE WAIT A MOMENT</p>
+            <p style="letter-spacing: 1px; font-weight: bold;">PROCESSING...</p>
+            <p style="font-size: 12px; opacity: 0.8;">IT MAY TAKE A FEW SECONDS</p>
         </div>
+
         <div class="result-scroll">
             <img id="final-preview-img" style="display:none;">
             <video id="final-video-preview" style="display:none;" controls playsinline loop></video>
         </div>
+        
+        <!-- 加入滑動提示 -->
+        <div id="scroll-hint" style="display:none; font-size: 10px; color: var(--blue); margin-bottom: 10px;">⬅ 左右滑動檢視成品 ➡</div>
+
         <button id="dl-all-btn" style="display:none;">DOWNLOAD ALL</button>
         <br><button class="back-btn" onclick="location.reload()">RETAKE</button>
     </div>
@@ -305,6 +333,9 @@
         const finalChunks = [];
         finalRecorder.ondataavailable = e => finalChunks.push(e.data);
         finalRecorder.onstop = () => {
+            // 在 generateAll 的 onstop 裡面
+            document.getElementById('final-preview-img').style.display = 'inline-block';
+            document.getElementById('final-video-preview').style.display = 'inline-block';
             const isMp4 = finalRecorder.mimeType.includes('mp4');
             const blob = new Blob(finalChunks, { type: isMp4 ? 'video/mp4' : 'video/webm' });
             const finalVideoURL = URL.createObjectURL(blob);
